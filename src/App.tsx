@@ -464,6 +464,7 @@ export function App() {
             user={user}
             habits={habits}
             cells={currentMonthCells}
+            habitsState={habitsState}
             selectedDate={selectedDate}
             weightLogs={weightLogs}
             bloodMarkers={bloodMarkers}
@@ -472,6 +473,7 @@ export function App() {
             contributions={contributions}
             financeConfig={financeConfig}
             bjjSessions={bjjSessions}
+            conditioningSessions={conditioningSessions}
             onNavigateTab={setActiveTab}
           />
         )}
