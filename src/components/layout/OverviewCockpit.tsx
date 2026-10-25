@@ -11,13 +11,15 @@ import {
   FinanceConfig, 
   BJJSession,
   ConditioningSession,
-  DailyNutrition
+  DailyNutrition,
+  AccountabilityNote
 } from '../../types';
 import { calculateGamificationStats, generateActivityHeatmapData } from '../../utils/gamification';
 import { GamificationBanner } from '../overview/GamificationBanner';
 import { ConsistencyHeatmap } from '../overview/ConsistencyHeatmap';
 import { PillarsProgressGrid } from '../overview/PillarsProgressGrid';
 import { WaterIntakeCard } from '../today/WaterIntakeCard';
+import { AccountabilityMirror } from '../mindset/AccountabilityMirror';
 
 interface OverviewCockpitProps {
   user: UserProfile;
@@ -35,6 +37,10 @@ interface OverviewCockpitProps {
   conditioningSessions?: ConditioningSession[];
   nutritionLogs?: DailyNutrition[];
   onSaveNutritionLog?: (log: DailyNutrition) => void;
+  accountabilityNotes?: AccountabilityNote[];
+  onSaveAccountabilityNote?: (note: AccountabilityNote) => void;
+  onDeleteAccountabilityNote?: (id: string) => void;
+  onToggleCrushAccountabilityNote?: (id: string) => void;
   onNavigateTab: (tab: 'habits' | 'bjj_health' | 'spiritual' | 'finance') => void;
 }
 
@@ -54,6 +60,10 @@ export const OverviewCockpit: React.FC<OverviewCockpitProps> = ({
   conditioningSessions = [],
   nutritionLogs = [],
   onSaveNutritionLog,
+  accountabilityNotes = [],
+  onSaveAccountabilityNote,
+  onDeleteAccountabilityNote,
+  onToggleCrushAccountabilityNote,
   onNavigateTab
 }) => {
   // Cálculo de estatísticas e gamificação central
@@ -120,6 +130,16 @@ export const OverviewCockpit: React.FC<OverviewCockpitProps> = ({
         conditioningSessions={conditioningSessions}
         onNavigateTab={onNavigateTab}
       />
+
+      {/* 5. David Goggins Accountability Mirror */}
+      {onSaveAccountabilityNote && onDeleteAccountabilityNote && onToggleCrushAccountabilityNote && (
+        <AccountabilityMirror
+          notes={accountabilityNotes}
+          onSaveNote={onSaveAccountabilityNote}
+          onDeleteNote={onDeleteAccountabilityNote}
+          onToggleCrushNote={onToggleCrushAccountabilityNote}
+        />
+      )}
     </div>
   );
 };

@@ -52,6 +52,7 @@ export interface CloudBackupPayload {
   devotionals?: DevotionalThought[];
   financeConfig?: FinanceConfig;
   contributions?: ContributionEntry[];
+  accountabilityNotes?: import('../types').AccountabilityNote[];
 }
 
 function getHeaders(token: string): HeadersInit {

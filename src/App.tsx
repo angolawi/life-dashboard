@@ -16,7 +16,8 @@ import {
   BJJSession,
   ConditioningSession,
   DailyNutrition,
-  ReadinessCheck
+  ReadinessCheck,
+  AccountabilityNote
 } from './types';
 import {
   DEFAULT_USER_PROFILE,
@@ -26,7 +27,8 @@ import {
   DEFAULT_PRAYERS,
   DEFAULT_FINANCE_CONFIG,
   DEFAULT_CONTRIBUTIONS,
-  DEFAULT_BJJ_SESSIONS
+  DEFAULT_BJJ_SESSIONS,
+  DEFAULT_ACCOUNTABILITY_NOTES
 } from './data/defaultData';
 import { Header } from './components/layout/Header';
 import { NavigationTabs, MainTabType } from './components/layout/NavigationTabs';
@@ -124,6 +126,7 @@ export function App() {
   const [devotionals, setDevotionals] = useLocalStorage<DevotionalThought[]>('nexus_devotionals', []);
   const [financeConfig, setFinanceConfig] = useLocalStorage<FinanceConfig>('nexus_finance_config', DEFAULT_FINANCE_CONFIG);
   const [contributions, setContributions] = useLocalStorage<ContributionEntry[]>('nexus_contributions', DEFAULT_CONTRIBUTIONS);
+  const [accountabilityNotes, setAccountabilityNotes] = useLocalStorage<AccountabilityNote[]>('nexus_accountability_mirror', DEFAULT_ACCOUNTABILITY_NOTES);
   const [localUpdatedAt, setLocalUpdatedAt] = useLocalStorage<string | null>(LAST_UPDATED_STORAGE_KEY, null);
 
   const markModified = useCallback(() => {
@@ -146,6 +149,7 @@ export function App() {
     if (payload.devotionals) setDevotionals(payload.devotionals);
     if (payload.financeConfig) setFinanceConfig(payload.financeConfig);
     if (payload.contributions) setContributions(payload.contributions);
+    if (payload.accountabilityNotes) setAccountabilityNotes(payload.accountabilityNotes);
     setLocalUpdatedAt(payload.updatedAt);
   }, [
     setUser,
@@ -162,6 +166,7 @@ export function App() {
     setDevotionals,
     setFinanceConfig,
     setContributions,
+    setAccountabilityNotes,
     setLocalUpdatedAt
   ]);
 
@@ -380,6 +385,40 @@ export function App() {
     markModified();
   };
 
+  // Handlers David Goggins Accountability Mirror
+  const handleSaveAccountabilityNote = (note: AccountabilityNote) => {
+    setAccountabilityNotes((prev) => {
+      const idx = prev.findIndex((n) => n.id === note.id);
+      if (idx >= 0) {
+        const copy = [...prev];
+        copy[idx] = note;
+        return copy;
+      }
+      return [note, ...prev];
+    });
+    markModified();
+  };
+
+  const handleDeleteAccountabilityNote = (id: string) => {
+    setAccountabilityNotes((prev) => prev.filter((n) => n.id !== id));
+    markModified();
+  };
+
+  const handleToggleCrushAccountabilityNote = (id: string) => {
+    setAccountabilityNotes((prev) =>
+      prev.map((n) => {
+        if (n.id !== id) return n;
+        const willCrush = n.status !== 'CRUSHED';
+        return {
+          ...n,
+          status: willCrush ? 'CRUSHED' : 'PENDING',
+          crushedAt: willCrush ? new Date().toISOString().split('T')[0] : undefined
+        };
+      })
+    );
+    markModified();
+  };
+
   const handleSaveUser = (u: UserProfile) => {
     setUser(u);
     markModified();
@@ -403,6 +442,7 @@ export function App() {
       devotionals,
       financeConfig,
       contributions,
+      accountabilityNotes,
       exportedAt: new Date().toISOString()
     };
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
@@ -433,6 +473,7 @@ export function App() {
         if (data.devotionals) setDevotionals(data.devotionals);
         if (data.financeConfig) setFinanceConfig(data.financeConfig);
         if (data.contributions) setContributions(data.contributions);
+        if (data.accountabilityNotes) setAccountabilityNotes(data.accountabilityNotes);
         markModified();
         alert('Dados importados com sucesso!');
       } catch (err) {
@@ -477,6 +518,10 @@ export function App() {
             conditioningSessions={conditioningSessions}
             nutritionLogs={nutritionLogs}
             onSaveNutritionLog={handleSaveNutritionLog}
+            accountabilityNotes={accountabilityNotes}
+            onSaveAccountabilityNote={handleSaveAccountabilityNote}
+            onDeleteAccountabilityNote={handleDeleteAccountabilityNote}
+            onToggleCrushAccountabilityNote={handleToggleCrushAccountabilityNote}
             onNavigateTab={setActiveTab}
           />
         )}

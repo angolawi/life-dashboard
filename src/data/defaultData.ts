@@ -101,3 +101,37 @@ export const DEFAULT_BJJ_SESSIONS: BJJSession[] = [
     createdAt: '2026-10-20T13:40:00Z'
   }
 ];
+
+export const DEFAULT_ACCOUNTABILITY_NOTES: import('../types').AccountabilityNote[] = [
+  {
+    id: 'goggins-1',
+    type: 'HARD_TRUTH',
+    title: 'Disciplina do Sono & Telas',
+    brutalTruth: 'Você diz que quer performar no tatame às 12h, mas fica rolando o celular até 23h30 e acorda fadigado.',
+    actionPlan: 'Telefone fora do quarto às 22h00. Luzes apagadas às 22h30 sem exceção.',
+    status: 'PENDING',
+    color: 'yellow',
+    createdAt: '2026-10-25'
+  },
+  {
+    id: 'goggins-2',
+    type: 'HARD_TRUTH',
+    title: 'Rolas com Pesados no Tatame',
+    brutalTruth: 'Você tem evitado chamar os faixas-roxas e marrons mais pesados para o rola por medo de ser amassado.',
+    actionPlan: 'O primeiro rola das 12h será sempre com o parceiro mais duro e pesado disponível.',
+    status: 'PENDING',
+    color: 'rose',
+    createdAt: '2026-10-25'
+  },
+  {
+    id: 'goggins-3',
+    type: 'COOKIE_JAR',
+    title: 'Pote de Cookies: Treino Descalço & Joelho Firme',
+    brutalTruth: 'Lembre-se de quando sua base estava instável e você completou as 6 semanas de força sem faltar um bloco.',
+    actionPlan: 'Quando a dor do treino bater, lembre-se: a mente desiste muito antes do corpo.',
+    status: 'CRUSHED',
+    color: 'emerald',
+    createdAt: '2026-10-24',
+    crushedAt: '2026-10-24'
+  }
+];

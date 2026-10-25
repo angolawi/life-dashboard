@@ -262,3 +262,18 @@ export interface ContributionEntry {
   destination: 'RESERVA_EMERGENCIA' | 'META_100K';
   notes?: string;
 }
+
+// 5. David Goggins Accountability Mirror
+export type MirrorNoteType = 'HARD_TRUTH' | 'MISSION' | 'COOKIE_JAR';
+
+export interface AccountabilityNote {
+  id: string;
+  type: MirrorNoteType;
+  title: string;
+  brutalTruth: string; // A desculpa ou realidade nua e crua
+  actionPlan: string;  // A missão de contra-ataque imediata
+  status: 'PENDING' | 'CRUSHED';
+  color: 'yellow' | 'rose' | 'amber' | 'blue' | 'emerald';
+  createdAt: string;
+  crushedAt?: string;
+}
