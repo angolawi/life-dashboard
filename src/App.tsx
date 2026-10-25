@@ -430,6 +430,7 @@ export function App() {
         if (data.readinessLogs) setReadinessLogs(data.readinessLogs);
         if (data.bibleLogs) setBibleLogs(data.bibleLogs);
         if (data.prayers) setPrayers(data.prayers);
+        if (data.devotionals) setDevotionals(data.devotionals);
         if (data.financeConfig) setFinanceConfig(data.financeConfig);
         if (data.contributions) setContributions(data.contributions);
         markModified();

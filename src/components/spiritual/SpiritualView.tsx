@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   BibleReadingEntry, 
   PrayerItem, 
@@ -14,7 +14,8 @@ import {
   Clock, 
   Bookmark, 
   Flame, 
-  Feather 
+  Feather,
+  Check
 } from 'lucide-react';
 
 interface SpiritualViewProps {
@@ -48,6 +49,7 @@ export const SpiritualView: React.FC<SpiritualViewProps> = ({
   const [readingChapters, setReadingChapters] = useState(todayReading?.chapters || '8-9');
   const [readingDone, setReadingDone] = useState(todayReading?.completed || false);
   const [readingNotes, setReadingNotes] = useState(todayReading?.notes || '');
+  const [readingSavedFeedback, setReadingSavedFeedback] = useState(false);
 
   // Estado Novo Pedido de Oração
   const [prayerTitle, setPrayerTitle] = useState('');
@@ -55,12 +57,32 @@ export const SpiritualView: React.FC<SpiritualViewProps> = ({
 
   // Estado Nova Meditação Devocional
   const todayDevotional = devotionals.find((d) => d.date === selectedDate);
-  const [devVerse, setDevVerse] = useState(todayDevotional?.verse || 'Romanos 8:28');
-  const [devReflection, setDevReflection] = useState(
-    todayDevotional?.reflection || 
-    'Sabemos que todas as coisas cooperam para o bem daqueles que amam a Deus, daqueles que são chamados segundo o seu propósito.'
-  );
-  const [devConfession, setDevConfession] = useState(todayDevotional?.confessionReference || 'Breve Catecismo P. 11 (A Providência de Deus)');
+  const [devVerse, setDevVerse] = useState(todayDevotional?.verse || '');
+  const [devReflection, setDevReflection] = useState(todayDevotional?.reflection || '');
+  const [devConfession, setDevConfession] = useState(todayDevotional?.confessionReference || '');
+  const [devSavedFeedback, setDevSavedFeedback] = useState(false);
+
+  // Sincroniza campos quando selectedDate, devotionals ou bibleLogs mudam
+  useEffect(() => {
+    const reading = bibleLogs.find((l) => l.date === selectedDate);
+    setReadingBook(reading?.book || 'Romanos');
+    setReadingChapters(reading?.chapters || '8-9');
+    setReadingDone(reading?.completed || false);
+    setReadingNotes(reading?.notes || '');
+
+    const dev = devotionals.find((d) => d.date === selectedDate);
+    if (dev) {
+      setDevVerse(dev.verse);
+      setDevReflection(dev.reflection);
+      setDevConfession(dev.confessionReference || '');
+    } else {
+      setDevVerse('');
+      setDevReflection('');
+      setDevConfession('');
+    }
+    setDevSavedFeedback(false);
+    setReadingSavedFeedback(false);
+  }, [selectedDate, devotionals, bibleLogs]);
 
   // Salvar Leitura do Dia
   const handleSaveDayReading = () => {
@@ -74,6 +96,8 @@ export const SpiritualView: React.FC<SpiritualViewProps> = ({
     };
     onSaveReading(entry);
     setReadingDone(true);
+    setReadingSavedFeedback(true);
+    setTimeout(() => setReadingSavedFeedback(false), 2500);
   };
 
   // Salvar Oração
@@ -93,6 +117,7 @@ export const SpiritualView: React.FC<SpiritualViewProps> = ({
 
   // Salvar Devocional
   const handleSaveTodayDevotional = () => {
+    if (!devVerse && !devReflection) return;
     const item: DevotionalThought = {
       id: todayDevotional?.id || `dev-${selectedDate}`,
       date: selectedDate,
@@ -101,6 +126,8 @@ export const SpiritualView: React.FC<SpiritualViewProps> = ({
       confessionReference: devConfession
     };
     onSaveDevotional(item);
+    setDevSavedFeedback(true);
+    setTimeout(() => setDevSavedFeedback(false), 3000);
   };
 
   // Estatísticas de Oração
@@ -406,12 +433,60 @@ export const SpiritualView: React.FC<SpiritualViewProps> = ({
             />
           </div>
 
-          <button
-            onClick={handleSaveTodayDevotional}
-            className="py-2.5 px-6 bg-purple-600 hover:bg-purple-700 text-white font-semibold text-xs rounded-xl shadow-sm transition-colors"
-          >
-            Salvar Meditação do Dia
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handleSaveTodayDevotional}
+              className="py-2.5 px-6 bg-purple-600 hover:bg-purple-700 text-white font-semibold text-xs rounded-xl shadow-sm transition-colors flex items-center gap-1.5"
+            >
+              <Check size={14} />
+              Salvar Meditação do Dia
+            </button>
+
+            {devSavedFeedback && (
+              <span className="text-xs font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-xl flex items-center gap-1.5 animate-in fade-in">
+                <CheckCircle2 size={14} />
+                Meditação salva com sucesso!
+              </span>
+            )}
+          </div>
+
+          {/* Histórico de Meditações Anteriores */}
+          {devotionals.length > 0 && (
+            <div className="pt-6 border-t border-slate-100 space-y-3">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                Histórico de Meditações Registradas ({devotionals.length})
+              </h4>
+              <div className="space-y-3">
+                {devotionals.slice().reverse().map((dev) => (
+                  <div
+                    key={dev.id}
+                    className={`p-4 rounded-xl border transition-all ${
+                      dev.date === selectedDate
+                        ? 'bg-purple-50/50 border-purple-300'
+                        : 'bg-slate-50/60 border-slate-200/80 hover:bg-slate-50'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold text-purple-700">{dev.verse}</span>
+                        {dev.confessionReference && (
+                          <span className="text-[10px] font-semibold text-slate-500 bg-white border border-slate-200 px-2 py-0.5 rounded-md">
+                            {dev.confessionReference}
+                          </span>
+                        )}
+                      </div>
+                      <span className="text-[10px] font-mono font-medium text-slate-400">
+                        {new Date(dev.date + 'T12:00:00').toLocaleDateString('pt-BR')}
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-700 mt-2 leading-relaxed">
+                      {dev.reflection}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>
