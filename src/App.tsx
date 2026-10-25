@@ -474,6 +474,8 @@ export function App() {
             financeConfig={financeConfig}
             bjjSessions={bjjSessions}
             conditioningSessions={conditioningSessions}
+            nutritionLogs={nutritionLogs}
+            onSaveNutritionLog={handleSaveNutritionLog}
             onNavigateTab={setActiveTab}
           />
         )}

@@ -10,12 +10,14 @@ import {
   ContributionEntry, 
   FinanceConfig, 
   BJJSession,
-  ConditioningSession
+  ConditioningSession,
+  DailyNutrition
 } from '../../types';
 import { calculateGamificationStats, generateActivityHeatmapData } from '../../utils/gamification';
 import { GamificationBanner } from '../overview/GamificationBanner';
 import { ConsistencyHeatmap } from '../overview/ConsistencyHeatmap';
 import { PillarsProgressGrid } from '../overview/PillarsProgressGrid';
+import { WaterIntakeCard } from '../today/WaterIntakeCard';
 
 interface OverviewCockpitProps {
   user: UserProfile;
@@ -31,6 +33,8 @@ interface OverviewCockpitProps {
   financeConfig: FinanceConfig;
   bjjSessions: BJJSession[];
   conditioningSessions?: ConditioningSession[];
+  nutritionLogs?: DailyNutrition[];
+  onSaveNutritionLog?: (log: DailyNutrition) => void;
   onNavigateTab: (tab: 'habits' | 'bjj_health' | 'spiritual' | 'finance') => void;
 }
 
@@ -48,6 +52,8 @@ export const OverviewCockpit: React.FC<OverviewCockpitProps> = ({
   financeConfig,
   bjjSessions,
   conditioningSessions = [],
+  nutritionLogs = [],
+  onSaveNutritionLog,
   onNavigateTab
 }) => {
   // Cálculo de estatísticas e gamificação central
@@ -72,6 +78,8 @@ export const OverviewCockpit: React.FC<OverviewCockpitProps> = ({
     70
   );
 
+  const currentNutritionLog = nutritionLogs.find((l) => l.date === selectedDate);
+
   return (
     <div className="space-y-6">
       {/* 1. Banner Principal Gamificado (XP, Nível, Streak e Conquistas) */}
@@ -80,13 +88,23 @@ export const OverviewCockpit: React.FC<OverviewCockpitProps> = ({
         userName={user.name} 
       />
 
-      {/* 2. Heatmap de Consistência Diária (Estilo GitHub) */}
+      {/* 2. Controle Rápido de Água / Hidratação Diária */}
+      {onSaveNutritionLog && (
+        <WaterIntakeCard
+          selectedDate={selectedDate}
+          nutritionLog={currentNutritionLog}
+          onSaveNutrition={onSaveNutritionLog}
+          targetLiters={3.5}
+        />
+      )}
+
+      {/* 3. Heatmap de Consistência Diária (Estilo GitHub) */}
       <ConsistencyHeatmap 
         data={heatmapData} 
         selectedDate={selectedDate} 
       />
 
-      {/* 3. Grid de Progressos dos 4 Pilares da Vida */}
+      {/* 4. Grid de Progressos dos 4 Pilares da Vida */}
       <PillarsProgressGrid
         user={user}
         habits={habits}

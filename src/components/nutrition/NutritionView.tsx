@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Apple, Droplets, Check, ShoppingCart, ChevronRight, Sparkles, Plus, Minus, Info } from 'lucide-react';
 import { DailyNutrition, NutritionProtocolType } from '../../types';
 import { ALINE_MARINHO_PLANS } from '../../data/alineMarinhoPlan';
 import { formatDisplayDate } from '../../hooks/useDailySchedule';
+import { WaterIntakeCard } from '../today/WaterIntakeCard';
 
 interface NutritionViewProps {
   selectedDate: string;
@@ -30,6 +31,17 @@ export const NutritionView: React.FC<NutritionViewProps> = ({
   const [snackPmDone, setSnackPmDone] = useState(nutritionLog?.snackPmDone || false);
   const [dinnerDone, setDinnerDone] = useState(nutritionLog?.dinnerDone || false);
   const [hydrationLiters, setHydrationLiters] = useState(nutritionLog?.hydrationLiters || 2.5);
+
+  // Sync state when selectedDate or nutritionLog changes
+  useEffect(() => {
+    setProtocolType(nutritionLog?.protocolType || defaultProtocol);
+    setBreakfastDone(nutritionLog?.breakfastDone || false);
+    setSnackAmDone(nutritionLog?.snackAmDone || false);
+    setLunchDone(nutritionLog?.lunchDone || false);
+    setSnackPmDone(nutritionLog?.snackPmDone || false);
+    setDinnerDone(nutritionLog?.dinnerDone || false);
+    setHydrationLiters(nutritionLog?.hydrationLiters ?? 2.5);
+  }, [selectedDate, nutritionLog, defaultProtocol]);
 
   const totalMeals = 5;
   const completedCount = [breakfastDone, snackAmDone, lunchDone, snackPmDone, dinnerDone].filter(Boolean).length;
@@ -190,51 +202,12 @@ export const NutritionView: React.FC<NutritionViewProps> = ({
       </div>
 
       {/* Hydration Tracker */}
-      <div className="bg-tatame-card border border-tatame-border rounded-2xl p-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2.5">
-            <div className="w-8 h-8 rounded-lg bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400">
-              <Droplets className="w-4 h-4" />
-            </div>
-            <div>
-              <h3 className="text-xs font-bold text-white">Hidratação do Atleta</h3>
-              <p className="text-[10px] text-tatame-muted">Meta: 3.5 Litros (recuperação articular de tatame)</p>
-            </div>
-          </div>
-          <div className="text-right">
-            <span className="text-sm font-extrabold text-blue-400">{hydrationLiters.toFixed(1)} L</span>
-            <span className="text-[10px] text-tatame-muted block">/ 3.5 L</span>
-          </div>
-        </div>
-
-        <div className="flex items-center space-x-2 mt-3">
-          <button
-            onClick={() => handleAdjustHydration(-0.25)}
-            className="p-2 rounded-xl bg-tatame-bg border border-tatame-border text-gray-400 hover:text-white"
-          >
-            <Minus className="w-4 h-4" />
-          </button>
-
-          <div className="flex-1 grid grid-cols-3 gap-1.5">
-            {[0.25, 0.5, 1.0].map((amount) => (
-              <button
-                key={amount}
-                onClick={() => handleAdjustHydration(amount)}
-                className="py-1.5 text-xs font-semibold rounded-lg bg-blue-950/60 border border-blue-800 text-blue-200 hover:bg-blue-900/60 transition-colors"
-              >
-                +{amount * 1000}ml
-              </button>
-            ))}
-          </div>
-
-          <button
-            onClick={() => handleAdjustHydration(0.25)}
-            className="p-2 rounded-xl bg-tatame-bg border border-tatame-border text-gray-400 hover:text-white"
-          >
-            <Plus className="w-4 h-4" />
-          </button>
-        </div>
-      </div>
+      <WaterIntakeCard
+        selectedDate={selectedDate}
+        nutritionLog={nutritionLog}
+        onSaveNutrition={onSaveNutrition}
+        targetLiters={3.5}
+      />
 
       {/* Meals Check-in List (Checkboxes Rápidos <10s) */}
       <div className="space-y-3">
