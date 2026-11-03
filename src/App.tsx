@@ -124,7 +124,24 @@ export function App() {
     { id: 'b1', date: '2026-10-24', book: 'Romanos', chapters: '8-9', completed: true, notes: 'A certeza da providência e o amor de Cristo.' },
     { id: 'b2', date: '2026-10-23', book: 'Romanos', chapters: '6-7', completed: true, notes: 'Mortos para o pecado e vivos para Deus.' },
   ]);
-  const [biblePlanProgress, setBiblePlanProgress] = useLocalStorage<BiblePlanProgress>('nexus_bible_plan_progress', DEFAULT_BIBLE_PLAN_PROGRESS);
+  const [biblePlanProgress, setBiblePlanProgress] = useLocalStorage<BiblePlanProgress>('nexus_bible_plan_progress', {
+    ...DEFAULT_BIBLE_PLAN_PROGRESS,
+    startDate: selectedDate
+  });
+
+  // Garante que se o startDate ainda for '2026-01-01' por padrão antigo, sincroniza para hoje se não houver leituras ainda
+  useEffect(() => {
+    if (
+      biblePlanProgress &&
+      (!biblePlanProgress.completedDayNumbers || biblePlanProgress.completedDayNumbers.length === 0) &&
+      biblePlanProgress.startDate !== selectedDate
+    ) {
+      setBiblePlanProgress((prev) => ({
+        ...prev,
+        startDate: selectedDate
+      }));
+    }
+  }, [selectedDate]);
   const [prayers, setPrayers] = useLocalStorage<PrayerItem[]>('nexus_prayers', DEFAULT_PRAYERS);
   const [devotionals, setDevotionals] = useLocalStorage<DevotionalThought[]>('nexus_devotionals', []);
   const [financeConfig, setFinanceConfig] = useLocalStorage<FinanceConfig>('nexus_finance_config', DEFAULT_FINANCE_CONFIG);

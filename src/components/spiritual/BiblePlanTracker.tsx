@@ -38,6 +38,7 @@ export const BiblePlanTracker: React.FC<BiblePlanTrackerProps> = ({
   selectedDate,
   onToggleDay,
   onQuickCheckinToday,
+  onUpdateStartDate,
   bibleLogs
 }) => {
   const [filterMode, setFilterMode] = useState<'all' | 'pending' | 'completed'>('all');
@@ -221,12 +222,28 @@ export const BiblePlanTracker: React.FC<BiblePlanTrackerProps> = ({
           </div>
 
           {/* Botão de Toggle Expandir */}
-          <button
-            onClick={() => setShowAllDays(!showAllDays)}
-            className="px-3.5 py-1.5 text-xs font-bold text-purple-700 bg-purple-50 hover:bg-purple-100 rounded-xl border border-purple-200 transition-colors self-start sm:self-auto"
-          >
-            {showAllDays ? 'Recolher Lista de Dias' : `Ver Grade Completa (${stats.completedDaysCount}/365)`}
-          </button>
+          <div className="flex items-center gap-2 self-start sm:self-auto">
+            {onUpdateStartDate && (
+              <div className="flex items-center gap-1.5 text-xs text-slate-500 bg-slate-50 px-2.5 py-1.5 rounded-xl border border-slate-200">
+                <Calendar size={13} className="text-purple-600" />
+                <span className="font-semibold">Início:</span>
+                <input
+                  type="date"
+                  value={progress.startDate || selectedDate}
+                  onChange={(e) => {
+                    if (e.target.value) onUpdateStartDate(e.target.value);
+                  }}
+                  className="bg-transparent border-none p-0 text-xs font-mono font-bold text-slate-700 focus:ring-0 cursor-pointer"
+                />
+              </div>
+            )}
+            <button
+              onClick={() => setShowAllDays(!showAllDays)}
+              className="px-3.5 py-1.5 text-xs font-bold text-purple-700 bg-purple-50 hover:bg-purple-100 rounded-xl border border-purple-200 transition-colors"
+            >
+              {showAllDays ? 'Recolher Lista de Dias' : `Ver Grade Completa (${stats.completedDaysCount}/365)`}
+            </button>
+          </div>
         </div>
 
         {/* Barra de Filtros e Busca */}

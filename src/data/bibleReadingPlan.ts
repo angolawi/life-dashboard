@@ -143,7 +143,7 @@ export const ANNUAL_BIBLE_PLAN: BiblePlanDay[] = generateAnnualBiblePlan();
 
 export const DEFAULT_BIBLE_PLAN_PROGRESS: BiblePlanProgress = {
   completedDayNumbers: [],
-  startDate: new Date().getFullYear() + '-01-01',
+  startDate: new Date().toISOString().split('T')[0],
   notesByDay: {}
 };
 

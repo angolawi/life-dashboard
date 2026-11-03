@@ -25,7 +25,10 @@ describe('Annual Bible Reading Plan', () => {
   });
 
   it('calculates statistics correctly with empty progress', () => {
-    const stats = calculateBiblePlanStats(DEFAULT_BIBLE_PLAN_PROGRESS, '2026-01-05');
+    const stats = calculateBiblePlanStats(
+      { ...DEFAULT_BIBLE_PLAN_PROGRESS, startDate: '2026-01-01' },
+      '2026-01-05'
+    );
     expect(stats.completedDaysCount).toBe(0);
     expect(stats.chaptersRead).toBe(0);
     expect(stats.percentageChapters).toBe(0);
