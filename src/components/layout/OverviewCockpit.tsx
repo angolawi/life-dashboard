@@ -6,6 +6,7 @@ import {
   WeightEntry, 
   BloodMarker, 
   BibleReadingEntry, 
+  BiblePlanProgress,
   PrayerItem, 
   ContributionEntry, 
   FinanceConfig, 
@@ -30,6 +31,7 @@ interface OverviewCockpitProps {
   weightLogs: WeightEntry[];
   bloodMarkers: BloodMarker[];
   bibleLogs: BibleReadingEntry[];
+  biblePlanProgress?: BiblePlanProgress;
   prayers: PrayerItem[];
   contributions: ContributionEntry[];
   financeConfig: FinanceConfig;
@@ -53,6 +55,7 @@ export const OverviewCockpit: React.FC<OverviewCockpitProps> = ({
   weightLogs,
   bloodMarkers,
   bibleLogs,
+  biblePlanProgress,
   prayers,
   contributions,
   financeConfig,
@@ -123,6 +126,7 @@ export const OverviewCockpit: React.FC<OverviewCockpitProps> = ({
         weightLogs={weightLogs}
         bloodMarkers={bloodMarkers}
         bibleLogs={bibleLogs}
+        biblePlanProgress={biblePlanProgress}
         prayers={prayers}
         contributions={contributions}
         financeConfig={financeConfig}

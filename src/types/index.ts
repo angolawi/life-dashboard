@@ -227,6 +227,20 @@ export interface BibleReadingEntry {
   notes?: string;
 }
 
+export interface BiblePlanDay {
+  dayNumber: number; // 1 a 365
+  book: string; // ex: "Gênesis"
+  chaptersText: string; // ex: "Gênesis 1-3"
+  chaptersCount: number; // ex: 3
+  testament: 'OT' | 'NT';
+}
+
+export interface BiblePlanProgress {
+  completedDayNumbers: number[];
+  startDate: string; // YYYY-MM-DD
+  notesByDay?: Record<number, string>;
+}
+
 export interface PrayerItem {
   id: string;
   title: string;

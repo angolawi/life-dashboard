@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { 
   BibleReadingEntry, 
+  BiblePlanProgress,
+  BiblePlanDay,
   PrayerItem, 
   DevotionalThought 
 } from '../../types';
+import { BiblePlanTracker } from './BiblePlanTracker';
 import { 
   BookOpen, 
   HeartHandshake, 
@@ -20,10 +23,13 @@ import {
 
 interface SpiritualViewProps {
   bibleLogs: BibleReadingEntry[];
+  biblePlanProgress?: BiblePlanProgress;
   prayers: PrayerItem[];
   devotionals: DevotionalThought[];
   selectedDate: string;
   onSaveReading: (entry: BibleReadingEntry) => void;
+  onTogglePlanDay?: (dayNumber: number) => void;
+  onUpdatePlanStartDate?: (date: string) => void;
   onSavePrayer: (prayer: PrayerItem) => void;
   onToggleAnsweredPrayer: (id: string, testimony?: string) => void;
   onDeletePrayer: (id: string) => void;
@@ -32,10 +38,13 @@ interface SpiritualViewProps {
 
 export const SpiritualView: React.FC<SpiritualViewProps> = ({
   bibleLogs,
+  biblePlanProgress = { completedDayNumbers: [], startDate: new Date().getFullYear() + '-01-01' },
   prayers,
   devotionals,
   selectedDate,
   onSaveReading,
+  onTogglePlanDay,
+  onUpdatePlanStartDate,
   onSavePrayer,
   onToggleAnsweredPrayer,
   onDeletePrayer,
@@ -98,6 +107,29 @@ export const SpiritualView: React.FC<SpiritualViewProps> = ({
     setReadingDone(true);
     setReadingSavedFeedback(true);
     setTimeout(() => setReadingSavedFeedback(false), 2500);
+  };
+
+  // Check-in rápido a partir do BiblePlanTracker
+  const handleQuickCheckinPlanDay = (day: BiblePlanDay) => {
+    if (onTogglePlanDay) {
+      onTogglePlanDay(day.dayNumber);
+    }
+    const isAlreadyCompleted = biblePlanProgress.completedDayNumbers?.includes(day.dayNumber);
+    // Se estiver completando agora, sincroniza com o formulário de hoje e salva log se o dia de hoje ainda não tiver registro
+    if (!isAlreadyCompleted) {
+      setReadingBook(day.book);
+      setReadingChapters(day.chaptersText);
+      const entry: BibleReadingEntry = {
+        id: todayReading?.id || `bible-${selectedDate}`,
+        date: selectedDate,
+        book: day.book,
+        chapters: day.chaptersText,
+        completed: true,
+        notes: readingNotes || `Check-in Plano Anual: Dia ${day.dayNumber}`
+      };
+      onSaveReading(entry);
+      setReadingDone(true);
+    }
   };
 
   // Salvar Oração
@@ -192,93 +224,108 @@ export const SpiritualView: React.FC<SpiritualViewProps> = ({
 
       {/* 1. LEITURA BÍBLICA */}
       {activeSubTab === 'bible' && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-base font-bold text-slate-900">Check-in de Leitura ({selectedDate})</h3>
-                <p className="text-xs text-slate-500">Mantenha a fidelidade diária nas Sagradas Escrituras.</p>
-              </div>
-              {readingDone ? (
-                <span className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-bold bg-emerald-50 text-emerald-700 rounded-lg border border-emerald-200">
-                  <CheckCircle2 size={14} />
-                  Leitura Concluída Hoje
-                </span>
-              ) : (
-                <span className="px-2.5 py-1 text-xs font-semibold bg-amber-50 text-amber-800 rounded-lg border border-amber-200">
-                  Pendente hoje
-                </span>
-              )}
-            </div>
+        <div className="space-y-6">
+          {/* Planejador Anual com Check-in Rápido e Adiantamento */}
+          <BiblePlanTracker
+            progress={biblePlanProgress}
+            selectedDate={selectedDate}
+            onToggleDay={onTogglePlanDay || (() => {})}
+            onQuickCheckinToday={handleQuickCheckinPlanDay}
+            onUpdateStartDate={onUpdatePlanStartDate}
+            bibleLogs={bibleLogs}
+          />
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-              <div>
-                <label className="text-xs font-semibold text-slate-600">Livro da Bíblia</label>
-                <input
-                  type="text"
-                  value={readingBook}
-                  onChange={(e) => setReadingBook(e.target.value)}
-                  placeholder="Gênesis, Salmos, Romanos..."
-                  className="w-full mt-1 px-3 py-2 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-purple-500"
-                />
-              </div>
-              <div>
-                <label className="text-xs font-semibold text-slate-600">Capítulos Lidos</label>
-                <input
-                  type="text"
-                  value={readingChapters}
-                  onChange={(e) => setReadingChapters(e.target.value)}
-                  placeholder="ex: 1 a 3 ou 8-10"
-                  className="w-full mt-1 px-3 py-2 border border-slate-200 rounded-xl text-xs font-mono focus:ring-2 focus:ring-purple-500"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="text-xs font-semibold text-slate-600">Anotações / Aplicação Pessoal</label>
-              <textarea
-                rows={3}
-                value={readingNotes}
-                onChange={(e) => setReadingNotes(e.target.value)}
-                placeholder="Qual princípio teológico ou exortação você extraiu deste texto hoje?"
-                className="w-full mt-1 px-3 py-2 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-purple-500"
-              />
-            </div>
-
-            <button
-              onClick={handleSaveDayReading}
-              className="w-full py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-semibold text-xs rounded-xl shadow-sm transition-colors"
-            >
-              Confirmar Leitura do Dia
-            </button>
-          </div>
-
-          <div className="lg:col-span-1 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-            <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-              <Bookmark size={16} className="text-purple-600" />
-              Meta Anual de Leitura
-            </h3>
-            <div className="p-4 bg-slate-50 rounded-xl border border-slate-200/80">
-              <div className="flex justify-between text-xs font-bold text-slate-700">
-                <span>Progresso Anual</span>
-                <span className="font-mono">1.189 Capítulos</span>
-              </div>
-              <div className="w-full h-2 bg-slate-200 rounded-full mt-2 overflow-hidden">
-                <div className="h-full bg-purple-600 rounded-full" style={{ width: '42%' }}></div>
-              </div>
-              <p className="text-[11px] text-slate-500 mt-2">
-                Meta média: ~3,2 capítulos por dia para leitura completa das Escrituras em 1 ano.
-              </p>
-            </div>
-
-            <div className="space-y-2">
-              <div className="text-xs font-bold text-slate-700 uppercase tracking-wider">Histórico Recente</div>
-              {bibleLogs.slice(-4).reverse().map((log) => (
-                <div key={log.id} className="p-2.5 bg-slate-50/70 rounded-lg text-xs flex justify-between items-center">
-                  <span className="font-semibold text-slate-800">{log.book} {log.chapters}</span>
-                  <span className="text-[11px] text-slate-500">{new Date(log.date + 'T12:00:00').toLocaleDateString('pt-BR')}</span>
+          {/* Registro Detalhado e Anotações Pessoais do Dia */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2 bg-white p-6 rounded-3xl border border-slate-200/90 shadow-sm space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-base font-bold text-slate-900">Registro & Reflexões da Leitura ({selectedDate})</h3>
+                  <p className="text-xs text-slate-500">Mantenha a fidelidade diária nas Sagradas Escrituras e registre suas observações.</p>
                 </div>
-              ))}
+                {readingDone ? (
+                  <span className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-bold bg-emerald-50 text-emerald-700 rounded-lg border border-emerald-200">
+                    <CheckCircle2 size={14} />
+                    Leitura Registrada Hoje
+                  </span>
+                ) : (
+                  <span className="px-2.5 py-1 text-xs font-semibold bg-amber-50 text-amber-800 rounded-lg border border-amber-200">
+                    Pendente hoje
+                  </span>
+                )}
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                <div>
+                  <label className="text-xs font-semibold text-slate-600">Livro da Bíblia</label>
+                  <input
+                    type="text"
+                    value={readingBook}
+                    onChange={(e) => setReadingBook(e.target.value)}
+                    placeholder="Gênesis, Salmos, Romanos..."
+                    className="w-full mt-1 px-3 py-2 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-purple-500"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-slate-600">Capítulos Lidos</label>
+                  <input
+                    type="text"
+                    value={readingChapters}
+                    onChange={(e) => setReadingChapters(e.target.value)}
+                    placeholder="ex: 1 a 3 ou 8-10"
+                    className="w-full mt-1 px-3 py-2 border border-slate-200 rounded-xl text-xs font-mono focus:ring-2 focus:ring-purple-500"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-slate-600">Anotações / Aplicação Pessoal</label>
+                <textarea
+                  rows={3}
+                  value={readingNotes}
+                  onChange={(e) => setReadingNotes(e.target.value)}
+                  placeholder="Qual princípio teológico ou exortação você extraiu deste texto hoje?"
+                  className="w-full mt-1 px-3 py-2 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-purple-500"
+                />
+              </div>
+
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={handleSaveDayReading}
+                  className="py-2.5 px-5 bg-purple-600 hover:bg-purple-700 text-white font-semibold text-xs rounded-xl shadow-sm transition-colors flex items-center gap-1.5"
+                >
+                  <Check size={14} />
+                  Salvar Anotações da Leitura
+                </button>
+                {readingSavedFeedback && (
+                  <span className="text-xs font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-xl flex items-center gap-1.5">
+                    <CheckCircle2 size={14} />
+                    Leitura salva com sucesso!
+                  </span>
+                )}
+              </div>
+            </div>
+
+            <div className="lg:col-span-1 bg-white p-6 rounded-3xl border border-slate-200/90 shadow-sm space-y-4">
+              <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                <Bookmark size={16} className="text-purple-600" />
+                Histórico Recente de Leituras
+              </h3>
+
+              <div className="space-y-2">
+                {bibleLogs.slice(-5).reverse().map((log) => (
+                  <div key={log.id} className="p-3 bg-slate-50/80 rounded-xl border border-slate-200/60 text-xs flex justify-between items-center">
+                    <div>
+                      <span className="font-bold text-slate-800 block">{log.book} {log.chapters}</span>
+                      {log.notes && <span className="text-[10px] text-slate-500 truncate max-w-[170px] block">{log.notes}</span>}
+                    </div>
+                    <span className="text-[11px] font-mono text-slate-500">{new Date(log.date + 'T12:00:00').toLocaleDateString('pt-BR')}</span>
+                  </div>
+                ))}
+                {bibleLogs.length === 0 && (
+                  <p className="text-xs text-slate-400 py-4 text-center">Nenhuma leitura registrada ainda.</p>
+                )}
+              </div>
             </div>
           </div>
         </div>

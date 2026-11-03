@@ -10,6 +10,7 @@ import {
   DailyNutrition,
   ReadinessCheck,
   BibleReadingEntry,
+  BiblePlanProgress,
   PrayerItem,
   DevotionalThought,
   FinanceConfig,
@@ -36,6 +37,7 @@ interface UseCloudSyncOptions {
   nutritionLogs: DailyNutrition[];
   readinessLogs: ReadinessCheck[];
   bibleLogs: BibleReadingEntry[];
+  biblePlanProgress?: BiblePlanProgress;
   prayers: PrayerItem[];
   devotionals: DevotionalThought[];
   financeConfig: FinanceConfig;
@@ -62,6 +64,7 @@ export function useCloudSync({
   nutritionLogs,
   readinessLogs,
   bibleLogs,
+  biblePlanProgress,
   prayers,
   devotionals,
   financeConfig,
@@ -102,6 +105,7 @@ export function useCloudSync({
     nutritionLogs,
     readinessLogs,
     bibleLogs,
+    biblePlanProgress,
     prayers,
     devotionals,
     financeConfig,
@@ -121,6 +125,7 @@ export function useCloudSync({
       nutritionLogs,
       readinessLogs,
       bibleLogs,
+      biblePlanProgress,
       prayers,
       devotionals,
       financeConfig,
@@ -138,6 +143,7 @@ export function useCloudSync({
     nutritionLogs,
     readinessLogs,
     bibleLogs,
+    biblePlanProgress,
     prayers,
     devotionals,
     financeConfig,
@@ -172,6 +178,7 @@ export function useCloudSync({
       nutritionLogs: current.nutritionLogs,
       readinessLogs: current.readinessLogs,
       bibleLogs: current.bibleLogs,
+      biblePlanProgress: current.biblePlanProgress,
       prayers: current.prayers,
       devotionals: current.devotionals,
       financeConfig: current.financeConfig,

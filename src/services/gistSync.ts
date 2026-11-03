@@ -48,6 +48,7 @@ export interface CloudBackupPayload {
   nutritionLogs?: DailyNutrition[];
   readinessLogs?: ReadinessCheck[];
   bibleLogs?: BibleReadingEntry[];
+  biblePlanProgress?: import('../types').BiblePlanProgress;
   prayers?: PrayerItem[];
   devotionals?: DevotionalThought[];
   financeConfig?: FinanceConfig;

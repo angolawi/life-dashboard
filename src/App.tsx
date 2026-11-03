@@ -9,6 +9,7 @@ import {
   WeightEntry,
   BloodMarker,
   BibleReadingEntry,
+  BiblePlanProgress,
   PrayerItem,
   DevotionalThought,
   FinanceConfig,
@@ -30,6 +31,7 @@ import {
   DEFAULT_BJJ_SESSIONS,
   DEFAULT_ACCOUNTABILITY_NOTES
 } from './data/defaultData';
+import { DEFAULT_BIBLE_PLAN_PROGRESS } from './data/bibleReadingPlan';
 import { Header } from './components/layout/Header';
 import { NavigationTabs, MainTabType } from './components/layout/NavigationTabs';
 import { OverviewCockpit } from './components/layout/OverviewCockpit';
@@ -122,6 +124,7 @@ export function App() {
     { id: 'b1', date: '2026-10-24', book: 'Romanos', chapters: '8-9', completed: true, notes: 'A certeza da providência e o amor de Cristo.' },
     { id: 'b2', date: '2026-10-23', book: 'Romanos', chapters: '6-7', completed: true, notes: 'Mortos para o pecado e vivos para Deus.' },
   ]);
+  const [biblePlanProgress, setBiblePlanProgress] = useLocalStorage<BiblePlanProgress>('nexus_bible_plan_progress', DEFAULT_BIBLE_PLAN_PROGRESS);
   const [prayers, setPrayers] = useLocalStorage<PrayerItem[]>('nexus_prayers', DEFAULT_PRAYERS);
   const [devotionals, setDevotionals] = useLocalStorage<DevotionalThought[]>('nexus_devotionals', []);
   const [financeConfig, setFinanceConfig] = useLocalStorage<FinanceConfig>('nexus_finance_config', DEFAULT_FINANCE_CONFIG);
@@ -145,6 +148,7 @@ export function App() {
     if (payload.nutritionLogs) setNutritionLogs(payload.nutritionLogs);
     if (payload.readinessLogs) setReadinessLogs(payload.readinessLogs);
     if (payload.bibleLogs) setBibleLogs(payload.bibleLogs);
+    if (payload.biblePlanProgress) setBiblePlanProgress(payload.biblePlanProgress);
     if (payload.prayers) setPrayers(payload.prayers);
     if (payload.devotionals) setDevotionals(payload.devotionals);
     if (payload.financeConfig) setFinanceConfig(payload.financeConfig);
@@ -162,6 +166,7 @@ export function App() {
     setNutritionLogs,
     setReadinessLogs,
     setBibleLogs,
+    setBiblePlanProgress,
     setPrayers,
     setDevotionals,
     setFinanceConfig,
@@ -193,6 +198,7 @@ export function App() {
     nutritionLogs,
     readinessLogs,
     bibleLogs,
+    biblePlanProgress,
     prayers,
     devotionals,
     financeConfig,
@@ -317,6 +323,29 @@ export function App() {
   };
 
   // Handlers Espiritual
+  const handleTogglePlanDay = (dayNumber: number) => {
+    setBiblePlanProgress((prev) => {
+      const currentList = prev?.completedDayNumbers || [];
+      const isCompleted = currentList.includes(dayNumber);
+      const nextList = isCompleted
+        ? currentList.filter((d) => d !== dayNumber)
+        : [...currentList, dayNumber].sort((a, b) => a - b);
+      return {
+        ...prev,
+        completedDayNumbers: nextList
+      };
+    });
+    markModified();
+  };
+
+  const handleUpdatePlanStartDate = (startDate: string) => {
+    setBiblePlanProgress((prev) => ({
+      ...prev,
+      startDate
+    }));
+    markModified();
+  };
+
   const handleSaveReading = (entry: BibleReadingEntry) => {
     setBibleLogs((prev) => {
       const idx = prev.findIndex((e) => e.date === entry.date);
@@ -511,6 +540,7 @@ export function App() {
             weightLogs={weightLogs}
             bloodMarkers={bloodMarkers}
             bibleLogs={bibleLogs}
+            biblePlanProgress={biblePlanProgress}
             prayers={prayers}
             contributions={contributions}
             financeConfig={financeConfig}
@@ -563,10 +593,13 @@ export function App() {
         {activeTab === 'spiritual' && (
           <SpiritualView
             bibleLogs={bibleLogs}
+            biblePlanProgress={biblePlanProgress}
             prayers={prayers}
             devotionals={devotionals}
             selectedDate={selectedDate}
             onSaveReading={handleSaveReading}
+            onTogglePlanDay={handleTogglePlanDay}
+            onUpdatePlanStartDate={handleUpdatePlanStartDate}
             onSavePrayer={handleSavePrayer}
             onToggleAnsweredPrayer={handleToggleAnsweredPrayer}
             onDeletePrayer={handleDeletePrayer}

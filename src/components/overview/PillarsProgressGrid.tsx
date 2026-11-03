@@ -5,6 +5,7 @@ import {
   WeightEntry, 
   BloodMarker, 
   BibleReadingEntry, 
+  BiblePlanProgress,
   PrayerItem, 
   ContributionEntry, 
   FinanceConfig, 
@@ -20,6 +21,7 @@ import {
   Flame,
   CheckCircle2
 } from 'lucide-react';
+import { calculateBiblePlanStats } from '../../data/bibleReadingPlan';
 
 interface PillarsProgressGridProps {
   user: UserProfile;
@@ -29,6 +31,7 @@ interface PillarsProgressGridProps {
   weightLogs: WeightEntry[];
   bloodMarkers: BloodMarker[];
   bibleLogs: BibleReadingEntry[];
+  biblePlanProgress?: BiblePlanProgress;
   prayers: PrayerItem[];
   contributions: ContributionEntry[];
   financeConfig: FinanceConfig;
@@ -45,6 +48,7 @@ export const PillarsProgressGrid: React.FC<PillarsProgressGridProps> = ({
   weightLogs,
   bloodMarkers,
   bibleLogs,
+  biblePlanProgress,
   prayers,
   contributions,
   financeConfig,
@@ -83,6 +87,7 @@ export const PillarsProgressGrid: React.FC<PillarsProgressGridProps> = ({
   const todayBible = bibleLogs.find((b) => b.date === selectedDate);
   const answeredPrayersCount = prayers.filter(p => p.status === 'ANSWERED').length;
   const totalBibleCount = bibleLogs.filter(b => b.completed).length;
+  const bibleStats = biblePlanProgress ? calculateBiblePlanStats(biblePlanProgress, selectedDate) : null;
 
   // 4. Finanças
   const totalContributed100k = contributions
@@ -212,17 +217,27 @@ export const PillarsProgressGrid: React.FC<PillarsProgressGridProps> = ({
               </div>
             </div>
             <span className="text-xs font-mono font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-lg">
-              {totalBibleCount} leituras
+              {bibleStats ? `${bibleStats.chaptersRead}/1189 cap` : `${totalBibleCount} leituras`}
             </span>
           </div>
 
           <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200/60 space-y-2">
             <div className="flex items-center justify-between text-xs">
               <span className="text-slate-600 font-medium">Leitura do Dia:</span>
-              <span className="font-bold text-slate-900">
-                {todayBible?.completed ? `✓ ${todayBible.book} ${todayBible.chapters}` : 'Aguardando check-in'}
+              <span className="font-bold text-slate-900 truncate max-w-[190px]">
+                {todayBible?.completed 
+                  ? `✓ ${todayBible.book} ${todayBible.chapters}` 
+                  : (bibleStats?.nextPendingDay ? `Pendente: ${bibleStats.nextPendingDay.chaptersText}` : 'Aguardando check-in')}
               </span>
             </div>
+            {bibleStats && (
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-slate-600 font-medium">Plano Anual:</span>
+                <span className="font-bold text-purple-700 font-mono">
+                  {bibleStats.completedDaysCount}/365 dias ({bibleStats.percentageChapters.toFixed(1)}%)
+                </span>
+              </div>
+            )}
             <div className="flex items-center justify-between text-xs">
               <span className="text-slate-600 font-medium">Orações Atendidas:</span>
               <span className="font-bold text-emerald-700 font-mono">
