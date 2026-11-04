@@ -489,6 +489,7 @@ export function App() {
       financeConfig,
       contributions,
       accountabilityNotes,
+      biblePlanProgress,
       exportedAt: new Date().toISOString()
     };
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
@@ -515,6 +516,7 @@ export function App() {
         if (data.nutritionLogs) setNutritionLogs(data.nutritionLogs);
         if (data.readinessLogs) setReadinessLogs(data.readinessLogs);
         if (data.bibleLogs) setBibleLogs(data.bibleLogs);
+        if (data.biblePlanProgress) setBiblePlanProgress(data.biblePlanProgress);
         if (data.prayers) setPrayers(data.prayers);
         if (data.devotionals) setDevotionals(data.devotionals);
         if (data.financeConfig) setFinanceConfig(data.financeConfig);
